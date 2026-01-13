@@ -6,7 +6,7 @@ This project demonstrates safe, schema-validated LLM prompting. Day 8 focuses on
 
 ## Setup
 
-1. Create and activate a virtual environment:
+1. Create and activate a virtual environment in the folder:
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
