@@ -37,3 +37,28 @@ python -m src.day_08.day_08_json_generator
 
 - `src/p2/json_utils.py`: JSON schema and validation
 - `src/day_08/day_08_json_generator.py`: JSON-forced LLM call and validation
+
+## Day 9: Output Constraining Demos
+
+### 1. Length Constraining
+
+```bash
+python -m src.day_09.day_09_constrainer
+```
+- Shows difference between no max_tokens and max_tokens=50.
+
+### 2. Format Constraining: Exactly 3 Paragraphs
+
+```bash
+python -m src.day_09.day_09_three_paragraphs
+```
+- Output is in the style of a 1920s newspaper reporter and exactly 3 paragraphs.
+- Prints the paragraph count for verification.
+
+### 3. Single-Output Constraint: Only the City Name
+
+```bash
+python -m src.day_09.day_09_single_output
+```
+- Output is only the city name (Ottawa), no punctuation or explanation.
+- Script raises an error if the output is not exactly 'Ottawa'.
