@@ -26,7 +26,7 @@ This project demonstrates safe, schema-validated LLM prompting. Day 8 focuses on
 
 **Do not commit your `.env` file to version control.**
 
-## How to run
+## How to run it
 
 ```bash
 source .venv/bin/activate
