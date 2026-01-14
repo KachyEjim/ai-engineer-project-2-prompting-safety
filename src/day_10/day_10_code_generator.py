@@ -1,14 +1,14 @@
 import os
 import sys
 import json
-from dotenv import load_dotenv
+from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 from importlib import util as importlib_util
 from importlib import import_module
 from src.p2.json_utils import CODEGEN_SCHEMA_KEYS, validate_codegen_payload
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "openai").lower()
+MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "gemini").lower()
 
 SYSTEM_PROMPT = (
     "You are a helpful assistant. You must reply ONLY with a valid JSON object containing exactly these keys: "
