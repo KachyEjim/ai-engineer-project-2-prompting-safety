@@ -2,6 +2,10 @@ import os
 import sys
 from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 from src.p2.input_validation import is_forbidden, block_message
+# --- PII Redaction Integration ---
+from src.p2.pii import redact_pii
+from src.p2.input_validation import escape_angle_brackets
+
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -57,13 +61,24 @@ def ask_bot_gemini(user_text: str) -> str:
         assistant_text = assistant_text.strip('`\n ')
     return assistant_text
 
+
+
+
 def ask_bot(user_text: str) -> str:
-
-
+    # Step 1: Redact PII
+    redacted = redact_pii(user_text)
+    print(f"[pii] redacted_input={redacted}")
+    # Step 2: Check forbidden on redacted
+    forbidden, matched = is_forbidden(redacted)
+    if forbidden:
+        return block_message(matched) # type: ignore
+    # Step 3: Escape brackets on redacted
+    safe_text = escape_angle_brackets(redacted)
+    # Step 4: Call LLM with safe text
     if MODEL_PROVIDER == "openai":
-        return ask_bot_openai(user_text)
+        return ask_bot_openai(safe_text)
     elif MODEL_PROVIDER == "gemini":
-        return ask_bot_gemini(user_text)
+        return ask_bot_gemini(safe_text)
     else:
         raise RuntimeError(f"[ERROR] Unknown MODEL_PROVIDER: {MODEL_PROVIDER}. Use 'openai' or 'gemini'.")
 
