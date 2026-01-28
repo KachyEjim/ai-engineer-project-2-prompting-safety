@@ -31,7 +31,7 @@ def call_openai_paragraphs(system_prompt, user_prompt):
             {"role": "user", "content": user_prompt},
         ],
     )
-    return resp.choices[0].message.content.strip()
+    return resp.choices[0].message.content
 
 def call_gemini_paragraphs(system_prompt, user_prompt):
     try:
