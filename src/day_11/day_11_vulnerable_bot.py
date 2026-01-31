@@ -2,9 +2,9 @@ import os
 import sys
 from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 from src.p2.input_validation import is_forbidden, block_message
-# --- PII Redaction Integration ---
 from src.p2.pii import redact_pii
 from src.p2.input_validation import escape_angle_brackets
+from src.p2.moderation import moderate_text
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -68,19 +68,33 @@ def ask_bot(user_text: str) -> str:
     # Step 1: Redact PII
     redacted = redact_pii(user_text)
     print(f"[pii] redacted_input={redacted}")
-    # Step 2: Check forbidden on redacted
+    # Step 2: Input moderation
+    input_mod = moderate_text(redacted)
+    if input_mod.flagged:
+        with open("reports/moderation_events.log", "a") as logf:
+            logf.write(f"INPUT flagged categories={','.join(input_mod.categories)}\n")
+        return "Your request violates our content policy. Please rephrase your query."
+    # Step 3: Check forbidden on redacted
     forbidden, matched = is_forbidden(redacted)
     if forbidden:
         return block_message(matched) # type: ignore
-    # Step 3: Escape brackets on redacted
+    # Step 4: Escape brackets on redacted
     safe_text = escape_angle_brackets(redacted)
-    # Step 4: Call LLM with safe text
+    # Step 5: Call LLM with safe text
     if MODEL_PROVIDER == "openai":
-        return ask_bot_openai(safe_text)
+        assistant_text = ask_bot_openai(safe_text)
     elif MODEL_PROVIDER == "gemini":
-        return ask_bot_gemini(safe_text)
+        assistant_text = ask_bot_gemini(safe_text)
     else:
         raise RuntimeError(f"[ERROR] Unknown MODEL_PROVIDER: {MODEL_PROVIDER}. Use 'openai' or 'gemini'.")
+    # Step 6: Output moderation
+    output_mod = moderate_text(assistant_text)
+    if output_mod.flagged:
+        with open("reports/moderation_events.log", "a") as logf:
+            logf.write(f"OUTPUT flagged categories={','.join(output_mod.categories)}\n")
+        return "I cannot display this response due to a content policy violation."
+    return assistant_text
+
 
 
 
@@ -91,4 +105,3 @@ if __name__ == "__main__":
         print(block_message(matched)) # type: ignore
     else:
         print(ask_bot(user_text))
-    
